@@ -7,6 +7,13 @@ cptox21_manuscript_si
 
 supporting notebook to the cptox21 project
 
+### Installation
+conda install jupyter
+conda install pandas
+conda install matplotlib
+conda install -c conda-forge scikit-learn
+pip install nonconformist
+
 ### Copyright
 
 Copyright (c) 2020, volkamerlab
@@ -14,5 +21,3 @@ Copyright (c) 2020, volkamerlab
 
 #### Acknowledgements
  
-Project based on the 
-[Computational Molecular Science Python Cookiecutter](https://github.com/molssi/cookiecutter-cms) version 1.3.
