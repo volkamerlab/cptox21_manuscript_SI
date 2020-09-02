@@ -11,6 +11,10 @@ from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
 
 from nonconformist.icp import IcpClassifier
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # -------------------------------------------------------------------
 # Load/handle signatures
 # -------------------------------------------------------------------
@@ -231,6 +235,7 @@ class KnownIndicesSampler(Sampler):
         return f"<{self.__class__.__name__} with {len(self.known_indices)} folds>"
         # fixme: check if len(self.known_indices) makes sense
 
+
 # -------------------------------------------------------------------
 # Inductive Conformal Predictor
 # -------------------------------------------------------------------
@@ -277,8 +282,8 @@ class InductiveConformalPredictor(IcpClassifier):
     todo
     """
 
-    def __init__(self, nc_function, condition=None):
-        super().__init__(nc_function, condition=condition)
+    def __init__(self, nc_function, condition=None, smoothing=False):
+        super().__init__(nc_function, condition=condition, smoothing=smoothing)
 
         # fixme: this subclass was originally there to allow serialisation of the conformal predictors. However,
         #  this is not available yet
@@ -396,9 +401,7 @@ class AggregatedConformalPredictor(BaseConformalPredictorAggregator):
         return nc_0, nc_1
 
     def _fit_calibrate(
-            self,
-            X_train=None,
-            y_train=None,
+        self, X_train=None, y_train=None,
     ):
 
         self.predictors_fitted.clear()
@@ -406,9 +409,7 @@ class AggregatedConformalPredictor(BaseConformalPredictorAggregator):
 
         samples = self.sampler.gen_samples(labels=y_train)
         for loop, p_train, cal in samples:
-            predictor = copy.deepcopy(
-                self.predictor
-            )
+            predictor = copy.deepcopy(self.predictor)
 
             # Fit
             predictor.train_index = p_train
@@ -429,8 +430,12 @@ class AggregatedConformalPredictor(BaseConformalPredictorAggregator):
         return predictions
 
     def predict_nc(self, X_score=None, y_score=None):
-        nc_0_predictions = [self._f_nc(p, X_score, y_score)[0] for p in self.predictors_fitted]
-        nc_1_predictions = [self._f_nc(p, X_score, y_score)[1] for p in self.predictors_fitted]
+        nc_0_predictions = [
+            self._f_nc(p, X_score, y_score)[0] for p in self.predictors_fitted
+        ]
+        nc_1_predictions = [
+            self._f_nc(p, X_score, y_score)[1] for p in self.predictors_fitted
+        ]
         nc_0_predictions = np.concatenate(nc_0_predictions).ravel().tolist()
         nc_1_predictions = np.concatenate(nc_1_predictions).ravel().tolist()
         return nc_0_predictions, nc_1_predictions
@@ -531,12 +536,7 @@ class CrossValidator:
         self.num_inactives = 0
 
     def cross_validate(
-        self,
-        steps,
-        endpoint=None,
-        X=None,
-        y=None,
-        class_wise_evaluation=False,
+        self, steps, endpoint=None, X=None, y=None, class_wise_evaluation=False,
     ):
 
         num_actives = y.sum()
@@ -559,9 +559,7 @@ class CrossValidator:
             # Fit ACP
             predictor.fit_calibrate(X_train=X[train], y_train=y[train])
             cv_predictors.append(predictor)
-            cv_prediction = predictor.predict(
-                X_score=X[test]
-            )
+            cv_prediction = predictor.predict(X_score=X[test])
             cv_predictions.append(cv_prediction)
 
             cv_evaluations = self._evaluate(
@@ -650,7 +648,9 @@ class CrossValidator:
 
     @property
     def averaged_evaluation_df_cv(self):
-        return self._average_evaluation_df(self._evaluation_df_cv, self.num_actives, self.num_inactives)
+        return self._average_evaluation_df(
+            self._evaluation_df_cv, self.num_actives, self.num_inactives
+        )
 
     @staticmethod
     def _average_evaluation_df(evaluation_df, num_actives, num_inactives):
@@ -675,7 +675,7 @@ class CrossValidator:
 
     @staticmethod
     def _format_predictions_df(predictions, names):
-        print("names", type(names), names)
+        #         print("names", type(names), names)
         pred_dfs = []
         for i, pred in enumerate(predictions):
             pred_df = pd.DataFrame(data=predictions[0][i])
@@ -690,6 +690,7 @@ class CrossValidator:
         colours=("blue", "darkred", "deepskyblue", "lightcoral"),
         class_wise=True,
         efficiency=True,
+            title_name=None
     ):
         return self._calibration_plot(
             averaged_evaluation_df=self.averaged_evaluation_df_cv,
@@ -697,6 +698,7 @@ class CrossValidator:
             colours=colours,
             class_wise=class_wise,
             efficiency=efficiency,
+            title_name=title_name
         )
 
     @staticmethod
@@ -706,6 +708,7 @@ class CrossValidator:
         colours=("blue", "darkred", "deepskyblue", "lightcoral"),
         class_wise=True,
         efficiency=True,
+        title_name=None,
     ):
 
         if class_wise and efficiency:
@@ -752,7 +755,10 @@ class CrossValidator:
         eval_legend = evaluation_measures.copy()
         eval_legend.insert(0, "expected_error_rate")
         fig.legend(eval_legend, bbox_to_anchor=(1.25, 0.75))
-        plt.title(endpoint)
+        if title_name is not None:
+            plt.title(f"{title_name} - {endpoint}")
+        else:
+            plt.title(endpoint)
         return plt
 
 
@@ -762,9 +768,7 @@ class PredictCrossValidator(CrossValidator):
         self._pred_predictions = None
 
     def predict(
-        self,
-        X_predict=None,
-        y_predict=None,
+        self, X_predict=None, y_predict=None,
     ):
 
         assert self.cv_predictors is not None
@@ -877,6 +881,7 @@ class CPTox21CrossValidator(CrossValidator):
 
             predictor_acp = copy.deepcopy(self.predictor)
             # Fit ACP, both with and without updated calibration set
+            logger.info("fitting and calibrating ACP")
             predictor_acp.fit_calibrate(
                 X_train=X_train[train],
                 y_train=y_train[train],
@@ -884,7 +889,6 @@ class CPTox21CrossValidator(CrossValidator):
                 y_update=y_update,
                 X_update2=X_score[score_cal],
                 y_update2=y_score[score_cal],
-
             )
             cv_predictors.append(predictor_acp)
 
@@ -893,14 +897,20 @@ class CPTox21CrossValidator(CrossValidator):
             # ----------------------------------------------------------
 
             # CV prediction (internal CV test set)
+            logger.info("crossvalidation prediction with original calibration set")
             cv_prediction = predictor_acp.predict(X_score=X_train[test])
             cv_predictions.append(cv_prediction)
 
             # Predict (external) score set using predictor with and without updated calibration set
+            logger.info("predict external data with original calibration set")
             pred_score_prediction = predictor_acp.predict(X_score=X_score)
             pred_test_prediction = predictor_acp.predict(X_score=X_update)
+            logger.info("predict external data with updated calibration set")
             pred_cal_update_prediction = predictor_acp.predict_cal_update(
                 X_score=X_score
+            )
+            logger.info(
+                "predict part of external data with model calibrated with (other) part of external data"
             )
             pred_cal_update2_prediction = predictor_acp.predict_cal_update2(
                 X_score=X_score[score_pred]
@@ -915,7 +925,9 @@ class CPTox21CrossValidator(CrossValidator):
             # Predict nonconformity scores with ACP
             # ----------------------------------------------------------
 
-            train_test_nc = predictor_acp.predict_nc(X_score=X_train[test], y_score=y_train[test])
+            train_test_nc = predictor_acp.predict_nc(
+                X_score=X_train[test], y_score=y_train[test]
+            )
             self._train_ncs["nc_0"].append(train_test_nc[0])
             self._train_ncs["nc_1"].append(train_test_nc[1])
             update_nc = predictor_acp.predict_nc(X_score=X_update, y_score=y_update)
@@ -989,6 +1001,7 @@ class CPTox21CrossValidator(CrossValidator):
         colours=("blue", "darkred", "deepskyblue", "lightcoral"),
         class_wise=True,
         efficiency=True,
+        title_name=None,
         **kwargs,
     ):
 
@@ -998,9 +1011,12 @@ class CPTox21CrossValidator(CrossValidator):
             colours=colours,
             class_wise=class_wise,
             efficiency=efficiency,
+            title_name=title_name,
         )
 
-    def plot_nonconformity_scores(self, cl, endpoint, nbins=50, colours=("blue", "orange", "green")):
+    def plot_nonconformity_scores(
+        self, cl, endpoint, nbins=50, colours=("blue", "orange", "green")
+    ):
         train_ncs = self._train_ncs[f"nc_{cl}"]
         train_ncs = [i for sl in train_ncs for i in sl]
 
@@ -1012,10 +1028,31 @@ class CPTox21CrossValidator(CrossValidator):
 
         fig, ax = plt.subplots()
 
-        ax.hist(train_ncs, bins=nbins, stacked=True, density=True, alpha=0.5, color=colours[0])
-        ax.hist(update_ncs, bins=nbins, stacked=True, density=True, alpha=0.5, color=colours[1])
-        ax.hist(score_ncs, bins=nbins, stacked=True, density=True, alpha=0.5, color=colours[2])
-        fig.legend(['train', 'update', 'score'])
+        ax.hist(
+            train_ncs,
+            bins=nbins,
+            stacked=True,
+            density=True,
+            alpha=0.5,
+            color=colours[0],
+        )
+        ax.hist(
+            update_ncs,
+            bins=nbins,
+            stacked=True,
+            density=True,
+            alpha=0.5,
+            color=colours[1],
+        )
+        ax.hist(
+            score_ncs,
+            bins=nbins,
+            stacked=True,
+            density=True,
+            alpha=0.5,
+            color=colours[2],
+        )
+        fig.legend(["train", "update", "score"])
 
         plt.title(f"{endpoint}: distribution of nonconformity scores class {cl}")
         return plt
@@ -1140,6 +1177,7 @@ class CPTox21TrainUpdateCrossValidator(PredictCrossValidator):
         colours=("blue", "darkred", "deepskyblue", "lightcoral"),
         class_wise=True,
         efficiency=True,
+            title_name=None,
         **kwargs,
     ):
 
@@ -1149,6 +1187,7 @@ class CPTox21TrainUpdateCrossValidator(PredictCrossValidator):
             colours=colours,
             class_wise=class_wise,
             efficiency=efficiency,
+            title_name=title_name
         )
 
     @property
@@ -1167,18 +1206,18 @@ class Evaluator:
     def __init__(self, y_pred, y_true=None, score_set=None, endpoint=None):
         if y_true is None:
             y_true = score_set.measurements[endpoint]
-        print(y_pred, type(y_pred))
+        #         print(y_pred[:5], type(y_pred))
         y_pred_0 = y_pred[:, 0]
         y_pred_1 = y_pred[:, 1]
         _prediction_df = pd.DataFrame(
             data={"p0": y_pred_0, "p1": y_pred_1, "known_label": y_true}
         )
-        print(_prediction_df.shape)
+        #         print(_prediction_df.shape)
         _prediction_df = (
             _prediction_df.dropna()
         )  # fixme: is this necessary? We only consider values == 0.0 and
         # values == 1.0 anyways
-        print(_prediction_df.shape)
+        #         print('after dropna: ', _prediction_df.shape)
         self._prediction_df = _prediction_df
         self.endpoint = endpoint
 
@@ -1208,7 +1247,7 @@ class Evaluator:
                     & (self._prediction_df.p1.values < significance)
                 )
             )
-            )
+        )
 
         return nof
 
