@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import math
 
 import copy
 import matplotlib.pyplot as plt
@@ -1404,3 +1405,99 @@ class Evaluator:
         ax.xlabel("significance")
         ax.ylabel("error rate")
         return fig
+
+    # ---------------
+    # RMSD evaluation
+    # ---------------
+    
+    
+def calculate_deviation_square(error, sl):
+    """
+    Calculate the square deviation between a given error value and a significance level
+    Parameters
+    ----------
+    error : error
+    sl : significance level
+
+    Returns
+    -------
+    square deviation
+
+    """
+    return (error-sl)**2
+
+    
+def calculate_rmsd_from_df(eval_df, cl=None):
+    """
+    Calculate the rmsd (root mean square deviation) for all error-significance level pairs
+    in a dataframe
+    
+    Parameters
+    ----------
+    eval_df : dataframe for which the rmsd should be calculated
+    cl : class of compounds for which the rmsd should be calculated, i.e. 0 or 1
+    if cl is None, the overall rmsd for all compounds will be calculated.
+    
+    Returns
+    -------
+    dataframe with an additional 'rmsd' column
+    
+    """
+    if cl:
+        eval_df['square'] = eval_df.apply(lambda row: calculate_deviation_square(
+            row[f"error_rate_{cl} mean"],   row["significance_level"]), axis=1)
+    else:
+        eval_df['square'] = eval_df.apply(lambda row: calculate_deviation_square(
+            row["error_rate mean"], row["significance_level"]), axis=1)
+    rmsd = np.round(math.sqrt(np.mean(eval_df["square"])), 3)
+    
+    return rmsd
+
+def calculate_pos_deviation_square(error, sl):
+    """
+    Calculate the square deviation between a given error value and a significance level
+    if the deviation is positive (>0)
+    
+    Parameters
+    ----------
+    error : error
+    sl : significance level
+    
+    Returns
+    -------
+    square deviation or 0
+    
+    """
+   
+    if error > sl:
+        return (error-sl)**2
+    else:
+
+        return 0
+    
+def calculate_rmsd_pos_from_df(eval_df, cl=None):
+    # fixme: exchange 'rmsd_pos' with a more appropriate term
+    """
+    Calculate the rmsd (root mean square deviation) for all error-significance level pairs
+    in a dataframe if the deviation (error - significance level) is larger than 0
+    
+    Parameters
+    ----------
+    eval_df : dataframe for which the rmsd_pos should be calculated
+    cl : class of compounds for which the rmsd_pos should be calculated, i.e. 0 or 1
+        if cl is None, the overall rmsd_pos for all compounds will be calculated.
+    
+    Returns
+    -------
+    dataframe with an additional 'rmsd_pos' column
+    
+    """
+    if cl:
+        eval_df['square'] = eval_df.apply(lambda row: calculate_pos_deviation_square(
+            row[f"error_rate_{cl} mean"],   row["significance_level"]), axis=1)
+    else:
+        eval_df['square'] = eval_df.apply(lambda row: calculate_pos_deviation_square(
+            row["error_rate mean"], row["significance_level"]), axis=1)
+    rmsd_pos = np.round(math.sqrt(np.mean(eval_df["square"])), 3)
+    
+    return rmsd_pos
