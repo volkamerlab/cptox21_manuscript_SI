@@ -1470,11 +1470,10 @@ def calculate_pos_deviation_square(error, sl):
     square deviation or 0
     
     """
-   
+    
     if error > sl:
         return (error-sl)**2
     else:
-
         return 0
     
 def calculate_rmsd_pos_from_df(eval_df, cl=None):
