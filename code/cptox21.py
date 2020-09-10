@@ -755,12 +755,13 @@ class CrossValidator:
         ax.set_ylabel("error rate")
         eval_legend = evaluation_measures.copy()
         eval_legend.insert(0, "expected_error_rate")
-        fig.legend(eval_legend, bbox_to_anchor=(1.25, 0.75))
+#         fig.legend(eval_legend, bbox_to_anchor=(1.25, 0.75))
+        lgd = ax.legend(eval_legend, loc='center left', bbox_to_anchor=(1, 0.5))
         if title_name is not None:
             plt.title(f"{title_name} - {endpoint}")
         else:
             plt.title(endpoint)
-        return plt
+        return plt, lgd
 
 
 class PredictCrossValidator(CrossValidator):
@@ -1053,10 +1054,11 @@ class CPTox21CrossValidator(CrossValidator):
             alpha=0.5,
             color=colours[2],
         )
-        fig.legend(["train", "update", "score"])
+#         fig.legend(["train", "update", "score"])
+        lgd = ax.legend(['train', 'update', 'score'], loc='center left', bbox_to_anchor=(1, 0.5))
 
         plt.title(f"{endpoint}: distribution of nonconformity scores class {cl}")
-        return plt
+        return plt, lgd
 
     @property
     def averaged_evaluation_df_pred_score(self):
