@@ -86,7 +86,7 @@ This work is licensed under the BSD 3-Clause "New" or "Revised" License.??
 ## Acknowledgement
 (Back to [Table of contents](#table-of-contents))
 
-* AM and AV would like to thank Jaime Rodríguez-Guerra for supporting the set up and reviewing this repository.
+* ((AM and AV would like to thank Jaime Rodríguez-Guerra for supporting the set up and reviewing this repository.))
 * Uppmax
 * FUBright Mobility
 
