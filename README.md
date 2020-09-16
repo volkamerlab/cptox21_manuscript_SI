@@ -42,7 +42,7 @@ Signatures descriptors were generated using `cpsign`
 ## Usage
 (Back to [Table of contents](#table-of-contents))
 
-The notebook can be used to train aggregated conformal predictors on the Tox21 endpoints. The predictions of Tox21 score 
+The notebooks can be used to train aggregated conformal predictors on the Tox21 endpoints. The predictions of Tox21 score 
  can be compared in different experiments with and without updated calibration sets as well as with updating the 
  complete training set.
  The notebook may be adapted to use the code for different datasets. 
