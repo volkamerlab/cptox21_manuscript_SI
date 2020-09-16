@@ -6,7 +6,7 @@ cptox21_manuscript_si
 
 This repository is part of the supporting information to the manuscript in preparation:
 
-#### Conformal Prediction and Exchangeability in Toxicological In Vitro Datasets
+#### Conformal Prediction and Exchangeability in Toxicological In Vitro Datasets (title tbd)
 Morger A., Svensson F., Arvidsson McShane S., Gauraha N., Norinder U., Spjuth O., Volkamer A.
 
 ## Table of contents
@@ -71,9 +71,13 @@ https://docs.anaconda.com/anaconda/install/) (large download) or [Miniconda](htt
 5. Install packages
 
     `conda install jupyter`
+    
     `conda install pandas`
+    
     `conda install matplotlib`
+    
     `conda install -c conda-forge scikit-learn`
+    
     `pip install nonconformist`
 
 

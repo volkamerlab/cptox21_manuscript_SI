@@ -1,3 +1,8 @@
+# This script is part of the supporting information to the manuscript entitled "Conformal Prediction and
+# Exchangeability in Toxicological In Vitro Datasets (title tbd)". The script was developed by Andrea Morger in the
+# In Silico Toxicology and Structural Biology Group of Prof. Dr. Andrea Volkamer at the Charité Universitätsmedizin
+# Berlin, in collaboration with Fredrik Svensson, Ulf Norinder and Ola Spjuth. It was last updated in September 2020.
+
 import pandas as pd
 import numpy as np
 import os
