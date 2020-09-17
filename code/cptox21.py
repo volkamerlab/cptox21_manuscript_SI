@@ -815,14 +815,14 @@ class CPTox21CrossValidator(CrossValidator):
 
         self._evaluation_df_pred_score = None
         self._evaluation_df_pred_test = None
-        self._evaluation_df_pred_cal_update = None
-        self._evaluation_df_pred_cal_update2 = None
+        self._evaluation_df_cal_update = None
+        self._evaluation_df_cal_update2 = None
         #         self._cv_predictions = None  # already initialised in parent class
 
         self._pred_score_predictions = None
         self._pred_test_predictions = None
-        self._pred_cal_update_predictions = None
-        self._pred_cal_update2_predictions = None
+        self._cal_update_predictions = None
+        self._cal_update2_predictions = None
 
         self._train_ncs = {"nc_0": [], "nc_1": []}
         self._update_ncs = {"nc_0": [], "nc_1": []}
@@ -856,8 +856,8 @@ class CPTox21CrossValidator(CrossValidator):
         cv_predictions = []
         pred_score_predictions = []
         pred_test_predictions = []
-        pred_cal_update_predictions = []
-        pred_cal_update2_predictions = []
+        cal_update_predictions = []
+        cal_update2_predictions = []
 
         cv_predictors = []
 
@@ -867,8 +867,8 @@ class CPTox21CrossValidator(CrossValidator):
         cv_evaluations = self._create_empty_evaluations_dict()
         pred_score_evaluations = self._create_empty_evaluations_dict()
         pred_test_evaluations = self._create_empty_evaluations_dict()
-        pred_cal_update_evaluations = self._create_empty_evaluations_dict()
-        pred_cal_update2_evaluations = self._create_empty_evaluations_dict()
+        cal_update_evaluations = self._create_empty_evaluations_dict()
+        cal_update2_evaluations = self._create_empty_evaluations_dict()
 
         samples = self.sampler.gen_samples(labels=y_train)
 
@@ -913,20 +913,20 @@ class CPTox21CrossValidator(CrossValidator):
             pred_score_prediction = predictor_acp.predict(X_score=X_score)
             pred_test_prediction = predictor_acp.predict(X_score=X_update)
             logger.info("predict external data with updated calibration set")
-            pred_cal_update_prediction = predictor_acp.predict_cal_update(
+            cal_update_prediction = predictor_acp.predict_cal_update(
                 X_score=X_score
             )
             logger.info(
                 "predict part of external data with model calibrated with (other) part of external data"
             )
-            pred_cal_update2_prediction = predictor_acp.predict_cal_update2(
+            cal_update2_prediction = predictor_acp.predict_cal_update2(
                 X_score=X_score[score_pred]
             )
 
             pred_score_predictions.append(pred_score_prediction)
             pred_test_predictions.append(pred_test_prediction)
-            pred_cal_update_predictions.append(pred_cal_update_prediction)
-            pred_cal_update2_predictions.append(pred_cal_update2_prediction)
+            cal_update_predictions.append(cal_update_prediction)
+            cal_update2_predictions.append(cal_update2_prediction)
 
             # ----------------------------------------------------------
             # Predict nonconformity scores with ACP
@@ -953,16 +953,16 @@ class CPTox21CrossValidator(CrossValidator):
                     cv_prediction,
                     pred_score_prediction,
                     pred_test_prediction,
-                    pred_cal_update_prediction,
-                    pred_cal_update2_prediction,
+                    cal_update_prediction,
+                    cal_update2_prediction,
                 ],
                 [y_train[test], y_score, y_update, y_score, y_score[score_pred]],
                 [
                     cv_evaluations,
                     pred_score_evaluations,
                     pred_test_evaluations,
-                    pred_cal_update_evaluations,
-                    pred_cal_update2_evaluations,
+                    cal_update_evaluations,
+                    cal_update2_evaluations,
                 ],
             ):
                 # fixme: do we really need evaluations???
@@ -979,16 +979,16 @@ class CPTox21CrossValidator(CrossValidator):
         self._evaluation_df_cv = pd.DataFrame(cv_evaluations)
         self._evaluation_df_pred_score = pd.DataFrame(pred_score_evaluations)
         self._evaluation_df_pred_test = pd.DataFrame(pred_test_evaluations)
-        self._evaluation_df_pred_cal_update = pd.DataFrame(pred_cal_update_evaluations)
-        self._evaluation_df_pred_cal_update2 = pd.DataFrame(
-            pred_cal_update2_evaluations
+        self._evaluation_df_cal_update = pd.DataFrame(cal_update_evaluations)
+        self._evaluation_df_cal_update2 = pd.DataFrame(
+            cal_update2_evaluations
         )
         self._cv_predictions = [cv_predictions, cv_y_test]
         self._pred_score_predictions = [pred_score_predictions, y_score]
         self._pred_test_predictions = [pred_test_predictions, y_update]
-        self._pred_cal_update_predictions = [pred_cal_update_predictions, y_score]
-        self._pred_cal_update2_predictions = [
-            pred_cal_update2_predictions,
+        self._cal_update_predictions = [cal_update_predictions, y_score]
+        self._cal_update2_predictions = [
+            cal_update2_predictions,
             y_score[score_pred],
         ]
         self.cv_predictors = cv_predictors
@@ -997,8 +997,8 @@ class CPTox21CrossValidator(CrossValidator):
             pd.DataFrame(cv_evaluations),
             pd.DataFrame(pred_score_evaluations),
             pd.DataFrame(pred_test_evaluations),
-            pd.DataFrame(pred_cal_update_evaluations),
-            pd.DataFrame(pred_cal_update2_evaluations),
+            pd.DataFrame(cal_update_evaluations),
+            pd.DataFrame(cal_update2_evaluations),
         )
 
     def calibration_plot(
@@ -1078,15 +1078,15 @@ class CPTox21CrossValidator(CrossValidator):
         )
 
     @property
-    def averaged_evaluation_df_pred_cal_update(self):
+    def averaged_evaluation_df_cal_update(self):
         return self._average_evaluation_df(
-            self._evaluation_df_pred_cal_update, self.num_actives, self.num_inactives
+            self._evaluation_df_cal_update, self.num_actives, self.num_inactives
         )
 
     @property
-    def averaged_evaluation_df_pred_cal_update2(self):
+    def averaged_evaluation_df_cal_update2(self):
         return self._average_evaluation_df(
-            self._evaluation_df_pred_cal_update2, self.num_actives, self.num_inactives
+            self._evaluation_df_cal_update2, self.num_actives, self.num_inactives
         )
 
     @property
@@ -1094,9 +1094,9 @@ class CPTox21CrossValidator(CrossValidator):
         return self._format_predictions_df(self._pred_predictions, self._names_predict)
 
     @property
-    def pred_cal_update_predictions_df(self):
+    def cal_update_predictions_df(self):
         return self._format_predictions_df(
-            self._pred_cal_update_predictions, self._names_predict
+            self._cal_update_predictions, self._names_predict
         )
 
 
