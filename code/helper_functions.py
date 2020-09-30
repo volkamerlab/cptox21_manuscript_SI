@@ -60,7 +60,7 @@ def load_data(endpoint, data_signatures_path, short_train=False):
 
 
 def cross_validate_compare_calibration_sets(
-    endpoint, acp, X_train, y_train, X_test, y_test, X_score, y_score, n_cv=5
+    endpoint, acp, X_train, y_train, X_test, y_test, X_score, y_score, n_cv=5, random_state=None
 ):
     """
     Perform a crossvalidation, including the following settings:
@@ -72,6 +72,7 @@ def cross_validate_compare_calibration_sets(
     
     Parameters
     ----------
+    random_state : define a random state for reproducibility
     n_cv : number of folds in cross-validation
     endpoint : endpoint for which the data should be loaded
     
@@ -88,8 +89,8 @@ def cross_validate_compare_calibration_sets(
     """
     cross_validator = CPTox21CrossValidator(
         acp,
-        cv_splitter=CrossValidationSampler(n_cv),
-        score_splitter=StratifiedRatioSampler(test_ratio=0.5),
+        cv_splitter=CrossValidationSampler(n_cv, random_state=random_state),
+        score_splitter=StratifiedRatioSampler(test_ratio=0.5, random_state=random_state),
     )
     cross_validation_dfs = cross_validator.cross_validate(
         steps=10,

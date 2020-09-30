@@ -5,6 +5,7 @@
 
 import pandas as pd
 import numpy as np
+import random
 import os
 import math
 
@@ -155,11 +156,12 @@ class CrossValidationSampler(Sampler):
     todo
     """
 
-    def __init__(self, n_folds=5):
+    def __init__(self, n_folds=5, random_state=None):
         self.n_folds = n_folds
+        self.random_state = random_state
 
     def _gen_samples(self, y):
-        folds = StratifiedKFold(n_splits=self.n_folds, random_state=None, shuffle=True)
+        folds = StratifiedKFold(n_splits=self.n_folds, random_state=self.random_state, shuffle=True)
         for i, (train, test) in enumerate(folds.split(X=np.zeros(len(y)), y=y)):
             # i specifies the fold of the crossvalidation, i.e. between 0 and 4
             yield i, train, test
@@ -197,12 +199,13 @@ class StratifiedRatioSampler(Sampler):
     todo
     """
 
-    def __init__(self, test_ratio=0.3, n_folds=1):
+    def __init__(self, test_ratio=0.3, n_folds=1, random_state=None):
         self.test_ratio = test_ratio
         self.n_folds = n_folds
+        self.random_state = random_state
 
     def _gen_samples(self, y):
-        sss = StratifiedShuffleSplit(n_splits=self.n_folds, test_size=self.test_ratio)
+        sss = StratifiedShuffleSplit(n_splits=self.n_folds, test_size=self.test_ratio, random_state=self.random_state)
         for i, (train, test) in enumerate(
             sss.split(X=np.zeros(len(y)), y=y)
         ):  # np.zeros used as a placeholder for X
