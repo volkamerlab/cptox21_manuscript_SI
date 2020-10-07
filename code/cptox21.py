@@ -883,7 +883,7 @@ class CPTox21CrossValidator(CrossValidator):
             score_samples = self.cal_update_sampler.gen_samples(labels=y_score)
             for loop, score_cal, score_pred in score_samples:
                 # This 'print' is necessary to actually get score_cal and score_pred
-                print("len score", len(score_cal), len(score_pred))
+                logger.info("len score, calibration:", len(score_cal), "prediction: ", len(score_pred))
 
             # ----------------------------------------------------------
             # Fit and calibrate ACP

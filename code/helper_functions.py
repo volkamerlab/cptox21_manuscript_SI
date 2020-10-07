@@ -3,8 +3,9 @@
 # In Silico Toxicology and Structural Biology Group of Prof. Dr. Andrea Volkamer at the Charité Universitätsmedizin
 # Berlin, in collaboration with Fredrik Svensson, Ulf Norinder and Ola Spjuth. It was last updated in September 2020.
 
-import pandas as pd
+import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from cptox21 import (
@@ -17,13 +18,13 @@ from cptox21 import (
 )
 
 
-def load_data(endpoint, data_signatures_path, short_train=False):
+def load_data(endpoint, signatures_path, short_train=False):
     """
     Load signature datasets per endpoint
     
     Parameters
     ----------
-    data_signatures_path : path to signatures, which should be loaded
+    signatures_path : path to signatures, which should be loaded
     short_train : set to true, if only small part of training set should be used, e.g. for test run
     endpoint : endpoint for which the data should be loaded
     
@@ -37,15 +38,15 @@ def load_data(endpoint, data_signatures_path, short_train=False):
     y_score : labels for Tox21score set
     
     """
-    datasets = ["train", "test", "score"]
-    train_path = define_path(
-        endpoint=endpoint, data=datasets[0], signatures_path=data_signatures_path
+    dataset_names = ["train", "test", "score"]
+    train_path = os.path.join(
+        signatures_path, f"data_signatures_{endpoint}_{dataset_names[0]}.csr"
     )
-    test_path = define_path(
-        endpoint=endpoint, data=datasets[1], signatures_path=data_signatures_path
+    test_path = os.path.join(
+        signatures_path, f"data_signatures_{endpoint}_{dataset_names[1]}.csr"
     )
-    score_path = define_path(
-        endpoint=endpoint, data=datasets[2], signatures_path=data_signatures_path
+    score_path = os.path.join(
+        signatures_path, f"data_signatures_{endpoint}_{dataset_names[2]}.csr"
     )
 
     X_train, y_train, X_test, y_test, X_score, y_score = load_signatures_files(
@@ -212,7 +213,7 @@ def draw_calibration_plot_all_endpoints(
         ]
 
     for endpoint in endpoints:
-        eval_df = pd.read_csv(f"{path}{endpoint}_averaged_eval_df_{strategy}.csv")
+        eval_df = pd.read_csv(os.path.join(path, f"{endpoint}_averaged_eval_df_{strategy}.csv"))
         axs[xax, yax].plot([0, 1], [0, 1], "--", linewidth=1, color="black")
         sl = eval_df["significance_level"]
         for ev, colour in zip(evaluation_measures, colours):
