@@ -1,6 +1,0 @@
-include LICENSE
-include MANIFEST.in
-include versioneer.py
-
-graft cptox21_manuscript_si
-global-exclude *.py[cod] __pycache__ *.so
