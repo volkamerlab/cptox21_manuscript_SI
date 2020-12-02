@@ -100,8 +100,7 @@ If you started with your own environment (3b), continue by installing the follow
 ## License
 (Back to [Table of contents](#table-of-contents))
 
-This work is licensed under the BSD 3-Clause "New" or "Revised" License.??
-# fixme: which license will we use??
+This work is licensed under the MIT License.
 
 ## Acknowledgement
 (Back to [Table of contents](#table-of-contents))
