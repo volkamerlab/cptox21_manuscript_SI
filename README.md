@@ -1,4 +1,4 @@
-cptox21_manuscript_si
+cptox21_manuscript_SI
 ==============================
 [//]: # (Badges)
 [![Travis Build Status](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/cptox21_manuscript_si.svg?branch=master)](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/cptox21_manuscript_si)
@@ -27,7 +27,7 @@ the Tox21Score datasets with and without updated calibration sets as well as aft
 The calibration of the trained models for the prediction on Tox21Score can be assessed with the help of calibration plots.
 
 Notebook `1_example_endpoint` explains the individual experiments and the calibration plots in more details while 
-notebook `1_all_endpoints` shows how the experiments and evaluation can be performed for all 12 Tox21 endpoints.
+notebook `2_all_endpoints` shows how the experiments and evaluation can be performed for all 12 Tox21 endpoints.
 It is even possible to load the results from the manuscript - instead of rerunning all experiments - and visualise the evaluation in the form of calibration plots and rmsd box plots.
 
 For an exhaustive explanation of conformal prediction and calibration plots we refer to the manuscript.
