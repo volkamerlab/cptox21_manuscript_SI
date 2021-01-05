@@ -1485,7 +1485,8 @@ def calculate_pos_deviation_square(error, sl):
         return (error-sl)**2
     else:
         return 0
-    
+
+
 def calculate_rmsd_pos_from_df(eval_df, cl=None):
     # fixme: exchange 'rmsd_pos' with a more appropriate term
     """
